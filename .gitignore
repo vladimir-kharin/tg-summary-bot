@@ -1,0 +1,5 @@
+.env
+data/
+config/chats.yaml
+*.db
+__pycache__/

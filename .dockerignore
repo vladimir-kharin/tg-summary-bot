@@ -1,0 +1,11 @@
+# В образ не кладём: секреты, данные, локальные и служебные файлы
+.env
+data/
+config/
+prompts/
+*.db
+__pycache__/
+*.md
+docs/
+listen_raw.py
+.git/

@@ -1,0 +1,14 @@
+services:
+  tg_summary_bot:
+    build: .
+    image: tg_summary_bot:latest
+    container_name: tg_summary_bot
+    restart: unless-stopped
+    # Токен, ключ OpenRouter, модель, прокси — в .env (в git не коммитится)
+    env_file:
+      - .env
+    # Данные, настройки и промпты живут на хосте: переживают пересборку и перезапуск
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./prompts:/app/prompts
