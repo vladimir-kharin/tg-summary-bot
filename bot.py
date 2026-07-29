@@ -15,7 +15,7 @@ from pathlib import Path
 from aiogram import Bot, Dispatcher, F
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.filters import Command, CommandObject
-from aiogram.types import Message
+from aiogram.types import Message, MessageReactionUpdated
 
 import config
 import db
@@ -66,6 +66,21 @@ async def on_chat_message(message: Message):
         "text": text,
         "reply_to": message.reply_to_message.message_id if message.reply_to_message else None,
     }])
+    conn.commit()
+
+
+@dp.message_reaction(F.chat.type.in_({"group", "supergroup"}))
+async def on_reaction(event: MessageReactionUpdated):
+    """Реакция в группе: держать в базе актуальный набор реакций участника.
+
+    Кастомные премиум-реакции пропускаем: вместо символа у них идентификатор,
+    сопоставить такую реакцию с настройкой mark нельзя.
+    """
+    if not event.user:  # анонимный администратор или сообщение от имени канала
+        return
+
+    emojis = [r.emoji for r in event.new_reaction if r.type == "emoji"]
+    db.set_user_reactions(conn, event.chat.id, event.message_id, event.user.id, emojis)
     conn.commit()
 
 

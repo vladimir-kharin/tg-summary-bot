@@ -121,6 +121,24 @@ def save_reactions(conn, chat_id, message_ids, reactions):
     )
 
 
+def set_user_reactions(conn, chat_id, message_id, user_id, emojis):
+    """Заменить набор реакций одного участника на одном сообщении.
+
+    Telegram присылает в событии текущий набор реакций этого участника
+    целиком, поэтому его прежние записи удаляются. Пустой набор означает,
+    что участник снял все свои реакции.
+    """
+    conn.execute(
+        "DELETE FROM reactions WHERE chat_id = ? AND message_id = ? AND user_id = ?",
+        (chat_id, message_id, user_id),
+    )
+    conn.executemany(
+        "INSERT OR IGNORE INTO reactions (chat_id, message_id, user_id, emoji) "
+        "VALUES (?, ?, ?, ?)",
+        [(chat_id, message_id, user_id, emoji) for emoji in emojis],
+    )
+
+
 def known_chats(conn):
     """Все чаты, которые бот когда-либо видел."""
     return conn.execute(
